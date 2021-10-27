@@ -33,7 +33,7 @@
 
     $.ajax({
         type: "GET",
-        url: "/WxPay/GetPayConfig",
+        url: "/WxPay/GetConfig",
         data: {"url" : url},
         beforeSend: function () {
             $("#btnPay").attr({ "disabled": "disabled" });//获取到配置之前，禁止点击付款按钮
@@ -79,7 +79,7 @@
                     nonceStr: res.data.nonceStr, // 支付签名随机串，不长于32 位
                     package: res.data.package, // 统一支付接口返回的prepay_id参数值，提交格式如：prepay_id=***）
                     signType: "MD5", // 签名方式，默认为'SHA1'，使用新版支付需传入'MD5'
-                    paySign: res.data.paysign, // 支付签名
+                    paySign: res.data.sign, // 支付签名
                     success: function (res) {
                         //支付成功
                     },
