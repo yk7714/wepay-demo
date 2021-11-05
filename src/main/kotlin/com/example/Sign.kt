@@ -1,40 +1,14 @@
 package com.example
 
-import io.quarkus.arc.config.ConfigProperties
 import java.io.UnsupportedEncodingException
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 import java.util.*
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
-import javax.enterprise.context.ApplicationScoped
-import javax.ws.rs.client.ClientBuilder
-import kotlin.collections.HashMap
 
-
+/**
+ * 用于jsapi_ticket签名
+ */
 internal object Sign {
-
-
-//    val executorService: ExecutorService = Executors.newCachedThreadPool();
-//    val client = ClientBuilder.newBuilder().executorService(executorService).build()
-
-//    @ApplicationScoped
-//    fun main(args: Array<String>) {
-//
-////        val jsapi_ticket = Session.cache.get("ticket")
-//        val jsapi_ticket = "LIKLckvwlJT9cWIhEQTwfDvK5RXd_GUYN8YIKxB6WceqZbpaS_Kiy5q3dkE5gkRhysoq1WhtHQk8Ktf0EN0dtQ"
-//
-//        // 注意 URL 一定要动态获取，不能 hardcode
-//        val url = "http://example.com"
-//        val map = sign(jsapi_ticket!!, url)
-//        for ((key, value) in map) {
-//            println("$key, $value")
-//        }
-//
-//
-//    }
-
-
     fun sign(jsapi_ticket: String, url: String): Map<String, String> {
         val ret: MutableMap<String, String> = HashMap()
         val nonce_str = create_nonce_str()
@@ -63,7 +37,7 @@ internal object Sign {
         ret["nonceStr"] = nonce_str
         ret["timestamp"] = timestamp
         ret["signature"] = signature
-        ret["appId"] = "wx7dfd9085faa115ea"
+        ret["appId"] = Session.appId
         return ret
     }
 
@@ -79,29 +53,12 @@ internal object Sign {
     }
 
     //create nonce str
-    private fun create_nonce_str(): String {
+    fun create_nonce_str(): String {
         return UUID.randomUUID().toString()
     }
 
     //create timestamp
-    private fun create_timestamp(): String {
+    fun create_timestamp(): String {
         return java.lang.Long.toString(System.currentTimeMillis() / 1000)
     }
 }
-
-@ApplicationScoped
-object Session{
-    val cache = HashMap<String, String>()
-    val timer = Timer()
-}
-
-//@ConfigProperties(prefix = "mchInfo")
-//class MchInfo{
-//
-//    private val appId: String = ""
-//    private val appSecret: String = ""
-//    private val mchId: String = ""
-//    private val paternerKey: String = ""
-//}
-//
-

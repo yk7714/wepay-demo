@@ -12,13 +12,12 @@
 <input type="button" onclick="startWxPay()" class="btn btn-primary btn-lg btn-block" value="点击付费(￥:0.01元)" id="btnPay" style="margin-top:80px;" />
 <script type="text/javascript">
     var code = GetQueryString("code");
-    alert("code: "+ code)
     var openid = window.localStorage.getItem("openid");
     var URL = document.location.href
-    alert("URL1:"+URL)
     var url = URL.split('#')[0]
-    alert(url)
-    //todo: get openid
+    var getBrandWCPayRequest;
+
+    //get openid
     if(openid==null){
         $.ajax({
             type: "GET",
@@ -29,6 +28,7 @@
                 window.localStorage.setItem("openid", openid);
             }
         })
+
     }
 
     $.ajax({
@@ -42,7 +42,7 @@
             $("#btnPay").removeAttr("disabled");//获取到配置，打开付款按钮
             //注入配置
             wx.config({
-                debug: true, // 开启调试模式,成功失败都会有alert框
+                debug: false, // 开启调试模式,成功失败都会有alert框
                 appId: data.appId, // 必填，公众号的唯一标识
                 timestamp: data.timeStamp, // 必填，生成签名的时间戳
                 nonceStr: data.nonceStr, // 必填，生成签名的随机串
@@ -60,35 +60,51 @@
         }
     });
 
-    function startWxPay() {
-        $.ajax({
-            type: "POST",
-            url: "/WxPay/GetPaySign",
-            data: { code: code, openid: openid },
-            beforeSend: function () {
-                $("#btnPay").attr({ "disabled": "disabled" });
-            },
-            success: function (res) {
-                $("#btnPay").removeAttr("disabled");
-                if (res.openid != null && res.openid != undefined && res.openid != "") {
-                    window.localStorage.setItem("openid", res.openid);
-                }
-                //支付请求
-                wx.chooseWXPay({
-                    timestamp: res.data.timeStamp, // 支付签名时间戳
-                    nonceStr: res.data.nonceStr, // 支付签名随机串，不长于32 位
-                    package: res.data.package, // 统一支付接口返回的prepay_id参数值，提交格式如：prepay_id=***）
-                    signType: "MD5", // 签名方式，默认为'SHA1'，使用新版支付需传入'MD5'
-                    paySign: res.data.sign, // 支付签名
-                    success: function (res) {
-                        //支付成功
-                    },
-                    cancel: function (res) {
-                        //支付取消
-                    }
-                });
+    $.ajax({
+        type: "POST",
+        url: "/WxPay/GetPaySign",
+        success: function (res) {
+            getBrandWCPayRequest = {
+                "appId": res.appId,
+                "timeStamp": res.timeStamp,
+                "nonceStr": res.nonceStr,
+                "package": res.package,
+                "signType": res.signType,
+                "paySign": res.paySign
             }
-        });
+        },
+        error: function(res){
+            console.log(res)
+            alert(JSON.stringify(res))
+        }
+    });
+
+    function startWxPay() {
+        if (typeof WeixinJSBridge == "undefined"){
+            if( document.addEventListener ){
+                document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
+            }else if (document.attachEvent){
+                document.attachEvent('WeixinJSBridgeReady', onBridgeReady);
+                document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
+            }
+        }else{
+            onBridgeReady();
+        }
+    }
+
+    function onBridgeReady(){
+        WeixinJSBridge.invoke(
+            'getBrandWCPayRequest', getBrandWCPayRequest,
+            function(res){
+                alert(JSON.stringify(res))
+                alert(res.err_msg)
+                alert("transaction_id: " + res.transaction_id)
+                if(res.err_msg == "get_brand_wcpay_request:ok" ){
+                    alert("支付成功")
+                }else{
+                    alert("支付失败")
+                }
+            });
     }
 
     function GetQueryString(name) {
@@ -96,11 +112,6 @@
         var r = window.location.search.substr(1).match(reg);
         if (r != null) return unescape(r[2]); return null;
     }
-
-
-
-
-
 
 </script>
 </body>
