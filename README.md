@@ -4,19 +4,19 @@
 
 1. 公众号内点击链接跳转到redirect_uri并携带code
     
-   链接形如: https://open.weixin.qq.com/connect/oauth2/authorize?appid=$appid&redirect_uri=$redirect_uri&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect
+   链接形如: https://open.weixin.qq.com/connect/oauth2/authorize?appid=appid&redirect_uri=redirect_uri&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect
    
     >注意：该redirect_uri必须在可信域名下；即需要在微信公众后台配置JS接口安全域名
    
 2. 传code调用接口：
    
-    https://api.weixin.qq.com/sns/oauth2/access_token?appid=${appId}&secret=${appSecret}&code=$code&grant_type=authorization_code
+    https://api.weixin.qq.com/sns/oauth2/access_token?appid={appId}&secret={appSecret}&code=code&grant_type=authorization_code
    
     获取openid、access_token、refresh_token
 
 3. access_token定时刷新，可使用refresh_token调用：
    
-    https://api.weixin.qq.com/sns/oauth2/refresh_token?appid=${appId}&grant_type=refresh_token&refresh_token=${refresh_token}
+    https://api.weixin.qq.com/sns/oauth2/refresh_token?appid={appId}&grant_type=refresh_token&refresh_token={refresh_token}
    
     刷新access_token
 
