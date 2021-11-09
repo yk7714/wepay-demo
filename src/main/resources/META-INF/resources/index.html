@@ -12,6 +12,7 @@
 <input type="button" onclick="startWxPay()" class="btn btn-primary btn-lg btn-block" value="点击付费(￥:0.01元)" id="btnPay" style="margin-top:80px;" />
 <script type="text/javascript">
     var code = GetQueryString("code");
+    var state = JSON.stringify(GetQueryString("state"));
     var openid = window.localStorage.getItem("openid");
     var URL = document.location.href
     var url = URL.split('#')[0]
@@ -60,9 +61,14 @@
         }
     });
 
+    var body =  {"id" : state.id, "fee" : state.fee, "openid" : openid}
+
     $.ajax({
         type: "POST",
         url: "/WxPay/GetPaySign",
+        data: JSON.stringify(body),
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
         success: function (res) {
             getBrandWCPayRequest = {
                 "appId": res.appId,

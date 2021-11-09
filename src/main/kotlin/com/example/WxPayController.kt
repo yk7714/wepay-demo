@@ -106,22 +106,22 @@ class WxPayController{
     @POST
     @Path("/GetPaySign")
     @Produces(MediaType.APPLICATION_JSON)
-    fun GetPaySign(): String{
+    fun GetPaySign(body: String): String{
         Session.setter(mch_id, appId, paternerKey, appSecret, serialNo)
         val config = MyConfig()
         val wxpay = WXPay(config, WXPayConstants.SignType.MD5)
         val data: MutableMap<String, String> = HashMap()
-        //todo: data's parameters need to be transmitted from the front end
-        data["body"] = "腾讯充值中心-QQ会员充值"
-        data["out_trade_no"] = "2016090910595900000033"
+        val jsonBody = mapper.readTree(body)
+        data["body"] = "buy some products"
+        data["out_trade_no"] = jsonBody["id"].toString()
         data["fee_type"] = "CNY"
-        data["total_fee"] = "10"
+        data["total_fee"] = jsonBody["fee"].toString()
         data["spbill_create_ip"] = "123.12.12.123"
         data["notify_url"] = "http://xxx/WxPay/notify"
         data["trade_type"] = "JSAPI" // 此处指定为扫码支付
         data["profit_sharing"] = "Y"
         //openid 需要通过jssdk获取（由前端传来）
-        data["openid"] = "xxxxxxxxxxxxxxx"
+        data["openid"] = jsonBody["openid"].toString()
         val resp: Map<String, String>
         try {
             //统一下单接口
